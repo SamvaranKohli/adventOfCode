@@ -16,6 +16,7 @@ int main()
 
     unordered_set<int> winning;
 
+    // store the number of cards for each card
     vector<int> totalCards(212, 1);
 
     int currLine = 0;
@@ -75,8 +76,10 @@ int main()
 
         }
 
+        // loop through the number of cards depending upon the numbe of points
         for(int j = 1; j <= points; j++)
         {
+            // add the current number of cards to the next n (points) cards
             totalCards[currLine+j] += totalCards[currLine];
         }
 
@@ -85,6 +88,7 @@ int main()
 
     }
 
+    // get the total number of cards
     for(int i = 0; i < totalCards.size(); i++)
     {
         ans += totalCards[i];

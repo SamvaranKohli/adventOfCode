@@ -18,17 +18,19 @@ int main()
 
     while (getline(fin, line)) 
     {
+        // remove the card num : from each line
         int pos = line.find(":");
         line = line.substr(pos + 2);
         int points = 0;
 
-        //cout<<line<<"\n";
-
+        // store the number
         int num = 0;
         int i = 0;
 
+        // loop through the winning numbers
         while(line[i] != '|')
         {
+            // get the numbers
             string numS = "";
 
             while(line[i] != ' ')
@@ -37,6 +39,7 @@ int main()
                 i++;
             }
 
+            // store the winning numbers in the set
             if(numS != "")
             {
                 num = stoi(numS);
@@ -48,15 +51,9 @@ int main()
 
         }
 
-        // for(auto it : winning)
-        // {
-        //     cout<<it<<" ";
-        // }
-
-        // cout<<"\n";
-
         i += 2;
 
+        // loop through my numbers in the line
         while(i < line.length())
         {
             string numS = "";
@@ -71,6 +68,7 @@ int main()
             {
                 num = stoi(numS);
 
+                // find if number exist in the winning set
                 if(winning.find(num) != winning.end())
                     points++;
             }
@@ -80,6 +78,7 @@ int main()
 
         }
 
+        // calculate ans for each line
         ans += pow(2, points-1);
 
         winning.clear();
