@@ -3,6 +3,8 @@
 #include<vector>
 #include<algorithm>
 #include<unordered_set>
+#include <unordered_map>
+#include <queue>
 
 using namespace std;
 
@@ -15,8 +17,8 @@ int main()
 
     fin.open("day5Input1.txt");
 
-    unordered_map<int, vector<int>> after;
-    unordered_map<int, vector<int>> before;
+    unordered_map<int, vector<int>> adj;
+    unordered_set<int> v;
  
     while (getline(fin, line)) 
     {
@@ -38,29 +40,60 @@ int main()
             i++;
         }
 
-        after[n1].push_back(n2);
-        before[n2].push_back(n1);
+        adj[n1].push_back(n2);
+        v.insert(n1);
+        v.insert(n2);
     }
 
-//     for (auto it = before.begin(); it != before.end(); it++) {
-//     cout << "Key: " << it->first << " Values: ";
-//     for (int value : it->second) {
-//         cout << value << " ";
-//     }
-//     cout << endl;
-// }
+    fin.close();
 
-fin.close();
+    unordered_map<int, int> degree;
+    vector<int> updates;
+    queue<int> q;
+
+    for (auto it = v.begin(); it != v.end(); it++) 
+    {
+        //cout << "Key: " << it->first << " Values: ";
+
+        for (int value : adj[*it]) 
+        {
+            degree[value]++;
+        }
+    }
+
+    for (auto it = v.begin(); it != v.end(); it++) 
+    {
+        if(degree[*it] == 0)
+        {
+            q.push(*it);
+        }
+    }
+
+    while(!q.empty())
+    {
+        int front = q.front();
+        updates.push_back(front);
+        q.pop();
+
+        for(auto it : adj[front])
+        {
+            degree[it]--;
+
+            if(degree[it] == 0)
+            {
+                q.push(it);
+            }
+        }
+    }
 
     fin.open("day5Input2.txt");
 
     while (getline(fin, line)) 
     {
-        unordered_map<int, int> updatesMP;
-        vector<int> updates;
-
         int i = 0;
         int index = 0;
+
+        vector<int> lineValues;
 
         while(i < line.size())
         {
@@ -74,74 +107,24 @@ fin.close();
 
             i++;
 
-            updatesMP[n1] = index;
-            index++;
-
-            updates.push_back(n1);
+            lineValues.push_back(n1);
         }
 
-        bool not_ = true;
-
-        i = 0;
-
-        while(i < updates.size())
+        bool is_sorted = std::is_sorted(lineValues.begin(), lineValues.end(), [&](int x, int y) 
         {
-            int j = 0;
-            bool change = true;
+            return std::distance(updates.begin(), std::find(updates.begin(), updates.end(), x)) < std::distance(updates.begin(), std::find(updates.begin(), updates.end(), y));
+        });
 
-            while(j < before[updates[i]].size())
-            {
-                //cout<<updates[updatesMP[before[updates[i]][j]]]<<" ";
-
-                if(updatesMP.find(before[updates[i]][j]) != updatesMP.end())
-                {
-                    if(i < updatesMP[before[updates[i]][j]])
-                    {
-                        int v = before[updates[i]][j];
-                        swap(updates[i], updates[updatesMP[before[updates[i]][j]]]);
-                        updatesMP[v] = i;
-                        not_ = false;
-                        change = false;
-                        break;
-                    }
-                }
-
-                j++;
-            }
-
-            j = 0;
-
-            while(j < after[updates[i]].size())
-            {
-                if(updatesMP.find(after[updates[i]][j]) != updatesMP.end())
-                {
-                    if(i > updatesMP[after[updates[i]][j]])
-                    {
-                        int v = after[updates[i]][j];
-                        swap(updates[i], updates[updatesMP[after[updates[i]][j]]]);
-                        updatesMP[v] = i;
-                        not_ = false;
-                        change = false;
-                        break;
-                    }
-                }
-
-                j++;
-            }
-
-            if(change)
-            {
-                i++;
-            }
-
-            //cout<<k<<"-"<<i<<" ";
-        }
-
-        if(!not_)
+        if(!is_sorted)
         {
-            ans += updates[updates.size()/2];
-        }
+            sort(lineValues.begin(), lineValues.end(), [&](int x, int y) 
+            {
+                return std::find(updates.begin(), updates.end(), x) < std::find(updates.begin(), updates.end(), y);
+            });
 
+            ans += lineValues[lineValues.size()/2];
+
+        }
     }
 
     cout<<ans;
