@@ -1,15 +1,12 @@
-#include<iostream>
+#include <iostream>
 #include <fstream>
-#include<vector>
-#include<algorithm>
-#include<unordered_set>
+#include <vector>
+#include <algorithm>
 #include <unordered_map>
-#include <queue>
 
 using namespace std;
 
-int main()
-{
+int main() {
     ifstream fin;
     string line;
 
@@ -17,8 +14,8 @@ int main()
 
     fin.open("day5Input1.txt");
 
-    unordered_map<int, vector<int>> adj;
-    unordered_set<int> v;
+    unordered_map<int, vector<int>> after;
+    unordered_map<int, vector<int>> before;
  
     while (getline(fin, line)) 
     {
@@ -40,60 +37,21 @@ int main()
             i++;
         }
 
-        adj[n1].push_back(n2);
-        v.insert(n1);
-        v.insert(n2);
+        after[n1].push_back(n2);
+        before[n2].push_back(n1);
     }
 
     fin.close();
-
-    unordered_map<int, int> degree;
-    vector<int> updates;
-    queue<int> q;
-
-    for (auto it = v.begin(); it != v.end(); it++) 
-    {
-        //cout << "Key: " << it->first << " Values: ";
-
-        for (int value : adj[*it]) 
-        {
-            degree[value]++;
-        }
-    }
-
-    for (auto it = v.begin(); it != v.end(); it++) 
-    {
-        if(degree[*it] == 0)
-        {
-            q.push(*it);
-        }
-    }
-
-    while(!q.empty())
-    {
-        int front = q.front();
-        updates.push_back(front);
-        q.pop();
-
-        for(auto it : adj[front])
-        {
-            degree[it]--;
-
-            if(degree[it] == 0)
-            {
-                q.push(it);
-            }
-        }
-    }
 
     fin.open("day5Input2.txt");
 
     while (getline(fin, line)) 
     {
+        unordered_map<int, int> updatesMP;
+        vector<int> updates;
+
         int i = 0;
         int index = 0;
-
-        vector<int> lineValues;
 
         while(i < line.size())
         {
@@ -107,28 +65,110 @@ int main()
 
             i++;
 
-            lineValues.push_back(n1);
+            updatesMP[n1] = index;
+            index++;
+
+            updates.push_back(n1);
         }
 
-        bool is_sorted = std::is_sorted(lineValues.begin(), lineValues.end(), [&](int x, int y) 
-        {
-            return std::distance(updates.begin(), std::find(updates.begin(), updates.end(), x)) < std::distance(updates.begin(), std::find(updates.begin(), updates.end(), y));
-        });
+        bool not_ = true;
 
-        if(!is_sorted)
+        for(int i = 0; i < updates.size(); i++)
         {
-            sort(lineValues.begin(), lineValues.end(), [&](int x, int y) 
+            for(int j = 0; j < before[updates[i]].size(); j++)
             {
-                return std::find(updates.begin(), updates.end(), x) < std::find(updates.begin(), updates.end(), y);
-            });
+                if(updatesMP.find(before[updates[i]][j]) != updatesMP.end())
+                {
+                    if(i < updatesMP[before[updates[i]][j]])
+                    {
+                        not_ = false;
+                        break;
+                    }
+                }
+            }
 
-            ans += lineValues[lineValues.size()/2];
+            if(!not_)
+            {
+                break;
+            }
 
+            for(int j = 0; j < after[updates[i]].size(); j++)
+            {
+                if(updatesMP.find(after[updates[i]][j]) != updatesMP.end())
+                {
+                    if(i > updatesMP[after[updates[i]][j]])
+                    {
+                        not_ = false;
+                        break;
+                    }
+                }
+            }
+
+            if(!not_)
+            {
+                break;
+            }
         }
+
+        if(!not_) 
+        {
+            bool check = false;
+
+            while (!check) 
+            {
+                check = true;
+
+                for (int i = 0; i < updates.size(); i++) 
+                {
+                    for (int j = 0; j < before[updates[i]].size(); j++) 
+                    {
+                        if (updatesMP.find(before[updates[i]][j]) != updatesMP.end()) 
+                        {
+                            if(i < updatesMP[before[updates[i]][j]])
+                            {
+                                int tempIndex = updatesMP[before[updates[i]][j]];
+
+                                swap(updates[i], updates[tempIndex]);
+
+                                updatesMP[updates[i]] = i;
+                                updatesMP[updates[tempIndex]] = tempIndex;
+
+                                check = false;
+                                break;
+                            }
+                            
+                        }
+                    }
+
+                    for (int j = 0; j < after[updates[i]].size(); j++) 
+                    {
+                        if (updatesMP.find(after[updates[i]][j]) != updatesMP.end()) 
+                        {
+                            if(i > updatesMP[after[updates[i]][j]])
+                            {
+                                int tempIndex = updatesMP[after[updates[i]][j]];
+
+                                swap(updates[i], updates[tempIndex]);
+
+                                updatesMP[updates[i]] = i;
+                                updatesMP[updates[tempIndex]] = tempIndex;
+
+                                check = false;
+                                break;
+                            }
+                            
+                        }
+                    }
+                }
+            }
+
+            ans += updates[updates.size() / 2];
+        }
+
     }
 
-    cout<<ans;
- 
+    cout << ans;
+
     fin.close();
     return 0;
 }

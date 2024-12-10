@@ -42,15 +42,7 @@ int main()
         before[n2].push_back(n1);
     }
 
-//     for (auto it = before.begin(); it != before.end(); it++) {
-//     cout << "Key: " << it->first << " Values: ";
-//     for (int value : it->second) {
-//         cout << value << " ";
-//     }
-//     cout << endl;
-// }
-
-fin.close();
+    fin.close();
 
     fin.open("day5Input2.txt");
 
@@ -79,17 +71,6 @@ fin.close();
 
             updates.push_back(n1);
         }
-
-//         cout << "Contents of updatesMP:" << endl;
-// for (auto it = updatesMP.begin(); it != updatesMP.end(); it++) {
-//     cout << "Key: " << it->first << ", Value: " << it->second << endl;
-// }
-
-// cout << "Contents of updates:" << endl;
-// for (int value : updates) {
-//     cout << value << " ";
-// }
-// cout << endl;
 
         bool not_ = true;
 
